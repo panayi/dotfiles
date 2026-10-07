@@ -49,6 +49,8 @@ link_file shell/zprofile .zprofile
 link_file config/starship.toml .config/starship.toml
 link_file config/starship-light.toml .config/starship-light.toml
 link_file ghostty/config.ghostty 'Library/Application Support/com.mitchellh.ghostty/config.ghostty'
+# Show the most recently changed Git branches first.
+git config --global branch.sort -committerdate
 if (( macos )); then
   zsh "$repo/macos/development.zsh"
   zsh "$repo/macos/input.zsh"

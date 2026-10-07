@@ -19,4 +19,6 @@ Orca is installed separately; there is no verified Homebrew cask in this manifes
 Git identity and authentication are intentionally machine-specific.
 Run gh auth login and configure git user.name/user.email on the new Mac.
 Configs are symlinked, so future edits are visible to git diff in this repo.
-Commit desired changes with git add and git commit. No remote is configured.
+Commit desired changes with git add and git commit, then git push.
+The GitHub repository is https://github.com/panayi/dotfiles.
+The installer sorts Git branches by most recent commit first.
