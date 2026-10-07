@@ -3,11 +3,13 @@
 
 # Make Homebrew tools available even in non-login terminal panes.
 typeset -U path PATH
-path=("$HOME/.local/bin" /opt/homebrew/bin /opt/homebrew/sbin $path)
-[[ -d /opt/homebrew/opt/rustup/bin ]] && path=(/opt/homebrew/opt/rustup/bin $path)
+typeset -g HOMEBREW_PREFIX=${HOMEBREW_PREFIX:-/opt/homebrew}
+[[ -d "$HOMEBREW_PREFIX" ]] || HOMEBREW_PREFIX=/usr/local
+path=("$HOME/.local/bin" "$HOMEBREW_PREFIX/bin" "$HOMEBREW_PREFIX/sbin" $path)
+[[ -d $HOMEBREW_PREFIX/opt/rustup/bin ]] && path=($HOMEBREW_PREFIX/opt/rustup/bin $path)
 [[ -d "$HOME/.cargo/bin" ]] && path=("$HOME/.cargo/bin" $path)
 [[ -d /Applications/Xcode.app/Contents/Developer ]] && export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
-[[ -d /opt/homebrew/opt/ruby/bin ]] && path=(/opt/homebrew/opt/ruby/bin $path)
+[[ -d $HOMEBREW_PREFIX/opt/ruby/bin ]] && path=($HOMEBREW_PREFIX/opt/ruby/bin $path)
 
 
 # Persistent, shared history. Commands beginning with a space stay private.
@@ -19,7 +21,7 @@ setopt HIST_SAVE_NO_DUPS HIST_IGNORE_SPACE HIST_REDUCE_BLANKS
 setopt AUTO_CD INTERACTIVE_COMMENTS
 
 # Completion menus, including completions provided by Homebrew.
-fpath=(/opt/homebrew/share/zsh/site-functions $fpath)
+fpath=($HOMEBREW_PREFIX/share/zsh/site-functions $fpath)
 autoload -Uz compinit
 compinit
 zstyle ':completion:*' menu select
@@ -111,7 +113,7 @@ fi
 (( $+commands[fnm] )) && eval "$(fnm env --use-on-cd --shell zsh)"
 [[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
 
-[[ -f /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+[[ -f $HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && source $HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 if (( $+commands[starship] )); then
   eval "$(starship init zsh)"
 else
@@ -119,4 +121,4 @@ else
 fi
 
 # Syntax highlighting must follow the other shell widgets/plugins.
-[[ -f /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] && source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+[[ -f $HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] && source $HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
