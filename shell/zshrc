@@ -1,0 +1,122 @@
+# Shared interactive shell setup for Ghostty and Orca.
+[[ -o interactive ]] || return
+
+# Make Homebrew tools available even in non-login terminal panes.
+typeset -U path PATH
+path=("$HOME/.local/bin" /opt/homebrew/bin /opt/homebrew/sbin $path)
+[[ -d /opt/homebrew/opt/rustup/bin ]] && path=(/opt/homebrew/opt/rustup/bin $path)
+[[ -d "$HOME/.cargo/bin" ]] && path=("$HOME/.cargo/bin" $path)
+[[ -d /Applications/Xcode.app/Contents/Developer ]] && export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
+[[ -d /opt/homebrew/opt/ruby/bin ]] && path=(/opt/homebrew/opt/ruby/bin $path)
+
+
+# Persistent, shared history. Commands beginning with a space stay private.
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=100000
+SAVEHIST=100000
+setopt EXTENDED_HISTORY SHARE_HISTORY HIST_IGNORE_ALL_DUPS
+setopt HIST_SAVE_NO_DUPS HIST_IGNORE_SPACE HIST_REDUCE_BLANKS
+setopt AUTO_CD INTERACTIVE_COMMENTS
+
+# Completion menus, including completions provided by Homebrew.
+fpath=(/opt/homebrew/share/zsh/site-functions $fpath)
+autoload -Uz compinit
+compinit
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+
+# Familiar editing and history shortcuts.
+bindkey -e
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey '^[[A' up-line-or-beginning-search
+bindkey '^[[B' down-line-or-beginning-search
+bindkey '^[OA' up-line-or-beginning-search
+bindkey '^[OB' down-line-or-beginning-search
+bindkey '^[[H' beginning-of-line
+bindkey '^[[F' end-of-line
+bindkey '^[[3~' delete-char
+bindkey '^[b' backward-word
+bindkey '^[f' forward-word
+
+export CLICOLOR=1
+export LESS='-R'
+
+# Explicit convenience commands keep standard tools available.
+if (( $+commands[eza] )); then
+  alias ll='eza --long --all --group-directories-first --icons=auto --git'
+  alias la='eza --all --group-directories-first --icons=auto'
+  alias tree='eza --tree --level=3 --group-directories-first --icons=auto'
+fi
+alias ..='cd ..'
+alias ...='cd ../..'
+alias gs='git status --short --branch'
+alias gd='git diff'
+alias gl='git log --oneline --graph --decorate -20'
+
+# Small helpers; paths with spaces work when quoted.
+mkcd() {
+  if (( $# != 1 )); then
+    print -u2 'Usage: mkcd <directory>'
+    return 2
+  fi
+  mkdir -p -- "$1" && builtin cd -- "$1"
+}
+croot() {
+  local root
+  root=$(git rev-parse --show-toplevel 2>/dev/null) || {
+    print -u2 'Not inside a Git repository.'
+    return 1
+  }
+  builtin cd -- "$root"
+}
+alias finder='open .'
+
+# Fuzzy history (Ctrl-R), files (Ctrl-T), and directories (Option-C).
+# Recheck system appearance at each prompt so existing shells follow macOS too.
+_terminal_update_appearance() {
+  local appearance
+  appearance=$(/usr/bin/defaults read -g AppleInterfaceStyle 2>/dev/null)
+  if [[ "$appearance" == Dark ]]; then
+    export STARSHIP_CONFIG="$HOME/.config/starship.toml"
+    export BAT_THEME='TwoDark'
+    export FZF_DEFAULT_OPTS='--height=45% --layout=reverse --border=rounded --info=inline --color=bg:#1a1b26,fg:#c0caf5,hl:#bb9af7,bg+:#292e42,fg+:#c0caf5,hl+:#bb9af7,border:#565f89,prompt:#7aa2f7,pointer:#bb9af7,marker:#9ece6a,spinner:#7dcfff,header:#7aa2f7'
+    ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#a9b1d6'
+  else
+    export STARSHIP_CONFIG="$HOME/.config/starship-light.toml"
+    export BAT_THEME='GitHub'
+    export FZF_DEFAULT_OPTS='--height=45% --layout=reverse --border=rounded --info=inline --color=bg:#e1e2e7,fg:#3760bf,hl:#9854f1,bg+:#c4c8da,fg+:#3760bf,hl+:#9854f1,border:#6172b0,prompt:#2e7de9,pointer:#9854f1,marker:#587539,spinner:#007197,header:#2e7de9'
+    ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#6172b0'
+  fi
+}
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd _terminal_update_appearance
+_terminal_update_appearance
+if (( $+commands[rg] )); then
+  export FZF_DEFAULT_COMMAND='rg --files --hidden -g !.git'
+  export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+fi
+if (( $+commands[bat] )); then
+  export FZF_CTRL_T_OPTS="--preview 'bat --color=always --style=numbers --line-range=:200 -- {}'"
+fi
+if (( $+commands[eza] )); then
+  export FZF_ALT_C_OPTS="--preview 'eza --tree --level=2 --color=always --group-directories-first -- {}'"
+fi
+(( $+commands[fzf] )) && source <(fzf --zsh)
+(( $+commands[zoxide] )) && eval "$(zoxide init zsh)"
+
+# Activate language managers when installed as part of the dev setup.
+(( $+commands[fnm] )) && eval "$(fnm env --use-on-cd --shell zsh)"
+[[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
+
+[[ -f /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+if (( $+commands[starship] )); then
+  eval "$(starship init zsh)"
+else
+  PROMPT='%F{magenta}%~%f %(?.%F{green}.%F{red})❯%f '
+fi
+
+# Syntax highlighting must follow the other shell widgets/plugins.
+[[ -f /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] && source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

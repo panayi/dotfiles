@@ -1,0 +1,22 @@
+PERSONAL MAC DEVELOPMENT SETUP
+
+Run ./install.zsh to link terminal configuration (existing files are backed up).
+Run ./install.zsh --packages to also install Homebrew packages, Node LTS,
+Python, Rust, and pnpm. Homebrew must already be installed.
+Run ./install.zsh --apple to additionally install Xcode via the App Store.
+Run ./install.zsh --macos to apply the selected OS and input preferences.
+Xcode and simulator downloads take considerably longer than terminal setup.
+
+Raycast: use Settings > Shortcuts to apply raycast/shortcuts.json on a new Mac.
+Use Import Snippets to import raycast/snippets.json. Enable Accessibility for
+Raycast to support window positioning and snippet expansion.
+For a full native migration use Export Settings & Data / Import Settings & Data.
+Keep encrypted .rayconfig exports outside Git; they can contain private data.
+Orca: font JetBrainsMono Nerd Font Mono 14, follow system appearance,
+dark Tokyo Night, light Tokyo Night Light, import Ghostty terminal settings.
+Orca is installed separately; there is no verified Homebrew cask in this manifest.
+
+Git identity and authentication are intentionally machine-specific.
+Run gh auth login and configure git user.name/user.email on the new Mac.
+Configs are symlinked, so future edits are visible to git diff in this repo.
+Commit desired changes with git add and git commit. No remote is configured.

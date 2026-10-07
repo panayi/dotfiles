@@ -1,0 +1,12 @@
+[
+  {
+    "name": "ISO date",
+    "keyword": ";date",
+    "text": "{date format=\"yyyy-MM-dd\"}"
+  },
+  {
+    "name": "Current timestamp",
+    "keyword": ";stamp",
+    "text": "{date format=\"yyyy-MM-dd HH:mm\"}"
+  }
+]

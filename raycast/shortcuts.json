@@ -1,0 +1,12 @@
+{
+  "launcher": "alt+space",
+  "Clipboard History": "cmd+shift+v",
+  "Search Snippets": "cmd+shift+;",
+  "Ghostty": "ctrl+alt+t",
+  "Google Chrome": "ctrl+alt+b",
+  "Orca": "ctrl+alt+o",
+  "Left Half": "ctrl+alt+left",
+  "Right Half": "ctrl+alt+right",
+  "Maximize": "ctrl+alt+up",
+  "Center": "ctrl+alt+down"
+}
